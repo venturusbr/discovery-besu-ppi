@@ -19,7 +19,18 @@ import org.ethereum.beacon.discovery.util.DecodeException;
 /** Handles raw BytesValue incoming data in {@link Field#INCOMING} */
 public class IncomingDataPacker implements EnvelopeHandler {
   private static final Logger LOG = LogManager.getLogger(IncomingDataPacker.class);
-  public static final int MAX_PACKET_SIZE = 1280;
+
+  /**
+   * The discv5 specification caps packets at 1280 bytes, the IPv6 minimum MTU. That budget cannot
+   * hold a record of the hybrid {@code vnt} identity scheme, whose ML-DSA-44 key and signature
+   * alone take about 3.8kB, so the limit is raised to accommodate one.
+   *
+   * <p>This is a deliberate deviation from the specification. Packets above 1280 bytes rely on IP
+   * fragmentation, which is unreliable across NATs and firewalls, and peers that enforce the
+   * specified limit will drop them.
+   */
+  public static final int MAX_PACKET_SIZE = 8192;
+
   public static final int MIN_PACKET_SIZE = 63;
   private final Bytes16 homeNodeId;
 

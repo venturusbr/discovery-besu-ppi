@@ -19,7 +19,6 @@ import org.ethereum.beacon.discovery.pipeline.Field;
 import org.ethereum.beacon.discovery.pipeline.HandlerUtil;
 import org.ethereum.beacon.discovery.pipeline.Pipeline;
 import org.ethereum.beacon.discovery.scheduler.Scheduler;
-import org.ethereum.beacon.discovery.schema.EnrField;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeRecordFactory;
 import org.ethereum.beacon.discovery.schema.NodeSession;
@@ -122,9 +121,7 @@ public class HandshakeMessagePacketHandler implements EnvelopeHandler {
               .getHeader()
               .getAuthData()
               .verify(
-                  whoAreYouChallenge,
-                  session.getHomeNodeId(),
-                  (Bytes) nodeRecord.get(EnrField.PKEY_SECP256K1));
+                  whoAreYouChallenge, session.getHomeNodeId(), nodeRecord.getSecp256k1PublicKey());
 
       if (!idNonceVerifyResult) {
         LOG.debug(

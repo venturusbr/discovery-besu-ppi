@@ -21,9 +21,21 @@ import org.ethereum.beacon.discovery.crypto.Signer;
 public interface IdentitySchemaInterpreter {
 
   IdentitySchemaInterpreter V4 = new IdentitySchemaV4Interpreter();
+  IdentitySchemaInterpreter VNT = new IdentitySchemaVntInterpreter();
 
   /** Returns supported scheme */
   IdentitySchema getScheme();
+
+  /**
+   * Maximum size, in bytes, of the RLP encoding of a record of this scheme. Records larger than
+   * this are rejected.
+   *
+   * <p>Defaults to the {@link NodeRecord#MAX_ENCODED_SIZE} limit mandated by EIP-778. Schemes based
+   * on post-quantum keys carry far more key and signature material and override this.
+   */
+  default int getMaxEncodedSize() {
+    return NodeRecord.MAX_ENCODED_SIZE;
+  }
 
   /* Signs nodeRecord, modifying it */
   void sign(NodeRecord nodeRecord, Signer signer);
@@ -35,6 +47,17 @@ public interface IdentitySchemaInterpreter {
 
   /** Delivers nodeId according to identity scheme scheme */
   Bytes getNodeId(NodeRecord nodeRecord);
+
+  /**
+   * The compressed secp256k1 public key of the record.
+   *
+   * <p>The discv5 handshake is classical regardless of the identity scheme: it needs this key for
+   * the ECDH key agreement and to verify the ID signature. Schemes that keep the classical key
+   * inside a hybrid key override this to extract it.
+   */
+  default Bytes getSecp256k1PublicKey(NodeRecord nodeRecord) {
+    return (Bytes) nodeRecord.get(EnrField.PKEY_SECP256K1);
+  }
 
   Optional<InetSocketAddress> getUdpAddress(NodeRecord nodeRecord);
 

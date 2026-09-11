@@ -22,7 +22,6 @@ import org.ethereum.beacon.discovery.pipeline.HandlerUtil;
 import org.ethereum.beacon.discovery.pipeline.Pipeline;
 import org.ethereum.beacon.discovery.pipeline.info.RequestInfo;
 import org.ethereum.beacon.discovery.scheduler.Scheduler;
-import org.ethereum.beacon.discovery.schema.EnrField;
 import org.ethereum.beacon.discovery.schema.NodeRecord;
 import org.ethereum.beacon.discovery.schema.NodeSession;
 import org.ethereum.beacon.discovery.schema.NodeSession.SessionState;
@@ -77,7 +76,7 @@ public class WhoAreYouPacketHandler implements EnvelopeHandler {
         session.cancelAllRequests("Bad WHOAREYOU received from node");
         return;
       }
-      Bytes remotePubKey = (Bytes) nodeRecord.get(EnrField.PKEY_SECP256K1);
+      Bytes remotePubKey = nodeRecord.getSecp256k1PublicKey();
       byte[] ephemeralKeyBytes = new byte[32];
       Functions.getRandom().nextBytes(ephemeralKeyBytes);
       KeyPair ephemeralKeyPair =

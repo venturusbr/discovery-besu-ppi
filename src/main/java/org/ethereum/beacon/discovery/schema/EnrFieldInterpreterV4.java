@@ -24,6 +24,7 @@ public class EnrFieldInterpreterV4 implements EnrFieldInterpreter {
   @SuppressWarnings({"DefaultCharset"})
   public EnrFieldInterpreterV4() {
     fieldDecoders.put(EnrField.PKEY_SECP256K1, Function.identity());
+    fieldDecoders.put(EnrField.PKEY_SECP256K1_MLDSA44, Function.identity());
     fieldDecoders.put(
         EnrField.ID,
         fromBytes(bytes -> IdentitySchema.fromString(new String(bytes.toArrayUnsafe()))));
