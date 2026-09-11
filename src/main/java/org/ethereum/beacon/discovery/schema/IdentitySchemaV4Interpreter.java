@@ -5,23 +5,20 @@
 package org.ethereum.beacon.discovery.schema;
 
 import static org.ethereum.beacon.discovery.schema.NodeRecordBuilder.addCustomField;
+import static org.ethereum.beacon.discovery.schema.NodeRecordFields.ADDRESS_IP_V4_FIELD_NAMES;
+import static org.ethereum.beacon.discovery.schema.NodeRecordFields.ADDRESS_IP_V6_FIELD_NAMES;
+import static org.ethereum.beacon.discovery.schema.NodeRecordFields.addressFromFields;
+import static org.ethereum.beacon.discovery.schema.NodeRecordFields.getAllFieldsThatMatch;
 
 import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.ImmutableSet;
 import java.net.Inet6Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -38,12 +35,6 @@ public class IdentitySchemaV4Interpreter implements IdentitySchemaInterpreter {
       CacheBuilder.newBuilder()
           .maximumSize(4000)
           .build(CacheLoader.from(IdentitySchemaV4Interpreter::calculateNodeIdImpl));
-
-  private static final ImmutableSet<String> ADDRESS_IP_V4_FIELD_NAMES =
-      ImmutableSet.of(EnrField.IP_V4, EnrField.UDP);
-
-  private static final ImmutableSet<String> ADDRESS_IP_V6_FIELD_NAMES =
-      ImmutableSet.of(EnrField.IP_V6, EnrField.UDP_V6);
 
   @Override
   public boolean isValid(final NodeRecord nodeRecord) {
@@ -163,35 +154,5 @@ public class IdentitySchemaV4Interpreter implements IdentitySchemaInterpreter {
   @Override
   public Bytes calculateNodeId(final Bytes publicKey) {
     return nodeIdCache.getUnchecked(publicKey);
-  }
-
-  private static Optional<InetSocketAddress> addressFromFields(
-      final NodeRecord nodeRecord, final String ipField, final String portField) {
-    if (!nodeRecord.containsKey(ipField) || !nodeRecord.containsKey(portField)) {
-      return Optional.empty();
-    }
-    final Bytes ipBytes = (Bytes) nodeRecord.get(ipField);
-    final int port = (int) nodeRecord.get(portField);
-    try {
-      return Optional.of(new InetSocketAddress(getInetAddress(ipBytes), port));
-    } catch (final UnknownHostException e) {
-      LOG.trace("Unable to resolve host: {}", ipBytes);
-      return Optional.empty();
-    }
-  }
-
-  private static InetAddress getInetAddress(final Bytes address) throws UnknownHostException {
-    return InetAddress.getByAddress(address.toArrayUnsafe());
-  }
-
-  private static Stream<EnrField> streamAllFields(final NodeRecord nodeRecord) {
-    final List<EnrField> fields = new ArrayList<>();
-    nodeRecord.forEachField((name, value) -> fields.add(new EnrField(name, value)));
-    return fields.stream();
-  }
-
-  private static List<EnrField> getAllFieldsThatMatch(
-      final NodeRecord nodeRecord, final Predicate<? super EnrField> predicate) {
-    return streamAllFields(nodeRecord).filter(predicate).collect(Collectors.toList());
   }
 }

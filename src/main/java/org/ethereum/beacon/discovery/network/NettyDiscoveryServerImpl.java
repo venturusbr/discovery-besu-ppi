@@ -8,7 +8,9 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.handler.logging.LogLevel;
@@ -20,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ethereum.beacon.discovery.pipeline.Envelope;
+import org.ethereum.beacon.discovery.pipeline.handler.IncomingDataPacker;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.ReplayProcessor;
@@ -60,6 +63,12 @@ public class NettyDiscoveryServerImpl implements NettyDiscoveryServer {
     final Bootstrap b = new Bootstrap();
     b.group(group)
         .channel(NioDatagramChannel.class)
+        // Netty sizes the datagram read buffer at 2048 bytes by default, which silently truncates
+        // anything larger. Size it to the packet limit so oversized packets are rejected by
+        // IncomingDataPacker rather than arriving corrupted.
+        .option(
+            ChannelOption.RCVBUF_ALLOCATOR,
+            new FixedRecvByteBufAllocator(IncomingDataPacker.MAX_PACKET_SIZE))
         .handler(
             new ChannelInitializer<NioDatagramChannel>() {
               @Override

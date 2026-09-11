@@ -35,6 +35,10 @@ public class EnrField {
   // Compressed secp256k1 public key, 33 bytes
   public static final String PKEY_SECP256K1 = "secp256k1";
 
+  /* ENR vnt Identity Schema */
+  // Hybrid public key: compressed secp256k1 key concatenated with the ML-DSA-44 key
+  public static final String PKEY_SECP256K1_MLDSA44 = "secp256k1mldsa44";
+
   private final String name;
   private final Object value;
 

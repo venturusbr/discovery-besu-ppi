@@ -58,7 +58,7 @@ public class NodeRecord {
     // serialise to check size
     Bytes serializedNodeRecord = serialize();
     checkArgument(
-        serializedNodeRecord.size() <= MAX_ENCODED_SIZE,
+        serializedNodeRecord.size() <= identitySchemaInterpreter.getMaxEncodedSize(),
         "Node record exceeds maximum encoded size");
   }
 
@@ -207,6 +207,20 @@ public class NodeRecord {
     return asRlpImpl(withSignature);
   }
 
+  /** The public key of this record, whichever field the identity scheme stores it in. */
+  private Object getPublicKey() {
+    final Object secp256k1 = fields.get(EnrField.PKEY_SECP256K1);
+    return secp256k1 != null ? secp256k1 : fields.get(EnrField.PKEY_SECP256K1_MLDSA44);
+  }
+
+  /**
+   * The compressed secp256k1 public key of this record, used by the discv5 handshake. For hybrid
+   * schemes this is the classical half of the hybrid key.
+   */
+  public Bytes getSecp256k1PublicKey() {
+    return identitySchemaInterpreter.getSecp256k1PublicKey(this);
+  }
+
   public Bytes getNodeId() {
     return identitySchemaInterpreter.getNodeId(this);
   }
@@ -255,7 +269,7 @@ public class NodeRecord {
         + "seq="
         + seq
         + ", publicKey="
-        + fields.get(EnrField.PKEY_SECP256K1)
+        + getPublicKey()
         + ", udpAddress="
         + getUdpAddress()
         + ", tcpAddress="

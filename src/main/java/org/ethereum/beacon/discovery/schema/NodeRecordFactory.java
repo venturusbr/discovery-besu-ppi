@@ -21,8 +21,12 @@ import org.ethereum.beacon.discovery.util.DecodeException;
 import org.ethereum.beacon.discovery.util.RlpUtil;
 
 public class NodeRecordFactory {
+  /**
+   * Accepts the classic {@code v4} scheme and the hybrid secp256k1 + ML-DSA-44 {@code vnt} scheme.
+   */
   public static final NodeRecordFactory DEFAULT =
-      new NodeRecordFactory(new IdentitySchemaV4Interpreter());
+      new NodeRecordFactory(new IdentitySchemaV4Interpreter(), new IdentitySchemaVntInterpreter());
+
   private static final int MAX_ENR_RLP_SIZE = 300;
   private static final int MAX_FIELD_KEY_SIZE = MAX_ENR_RLP_SIZE;
 

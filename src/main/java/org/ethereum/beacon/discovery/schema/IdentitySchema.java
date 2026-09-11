@@ -9,7 +9,8 @@ import java.util.Map;
 
 /** Available identity schemas of Ethereum {@link NodeRecord} signature */
 public enum IdentitySchema {
-  V4("v4");
+  V4("v4"),
+  VNT("vnt"); // ECDSA-MLDSA44 signed node record
 
   private static final Map<String, IdentitySchema> NAME_MAP = new HashMap<>();
 
