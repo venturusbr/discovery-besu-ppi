@@ -11,6 +11,10 @@ plugins {
 }
 
 rootProject.version = calculatePublishVersion()
+// Declared so that Gradle can identify this project as `tech.pegasys.discovery:discovery` when it
+// is consumed as a source dependency. The publication below sets the same group id, but that only
+// applies when publishing to a Maven repository, not when another build resolves this project.
+group = 'tech.pegasys.discovery'
 def specificVersion = calculateVersion()
 
 apply from: "${rootDir}/gradle/versions.gradle"
